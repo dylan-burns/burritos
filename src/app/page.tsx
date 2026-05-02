@@ -7,6 +7,7 @@ import QuotesTable from "@/components/QuotesTable";
 import StaticCosts from "@/components/StaticCosts";
 import GrandTotal from "@/components/GrandTotal";
 import { getDrivingRoute, DrivingRoute } from "@/lib/routing";
+import { Carrier, Service, SERVICE_LABELS } from "@/lib/shipping";
 import {
   haversineMiles,
   distanceToZone,
@@ -14,8 +15,6 @@ import {
   zoneToTransitDays,
   BURRITO_LB,
   BOX_OVERHEAD_LB,
-  CARRIERS,
-  calculateRate,
   ICE_PACK_COST,
   ICE_PACKS_PER_BOX,
   INSULATED_BAG_COST,
@@ -53,13 +52,31 @@ export default function Home() {
     [zone, totalWt]
   );
 
-  const cheapestGround = useMemo(
-    () => Math.min(...CARRIERS.map((c) => calculateRate(c, "ground", zone, totalWt))),
-    [zone, totalWt]
-  );
+  const [selected, setSelected] = useState<{ service: Service; carrier: Carrier } | null>(null);
+  const selectedQuote = useMemo(() => {
+    if (!selected) return null;
+    const q = quotesByService[selected.service]?.find((x) => x.carrier === selected.carrier);
+    if (!q) return null;
+    return {
+      cost: q.cost,
+      label: `${q.carrier.toUpperCase()} · ${SERVICE_LABELS[q.service][q.carrier]}`,
+    };
+  }, [selected, quotesByService]);
+
   const materialCost = ICE_PACK_COST * ICE_PACKS_PER_BOX + INSULATED_BAG_COST;
   const ingredientCost = BURRITO_COST_EACH * burritos;
-  const totalCost = cheapestGround + materialCost + ingredientCost;
+  const cargoCost = materialCost + ingredientCost;
+
+  // ============ WIZARD ============
+  const STEPS = [
+    { n: 1, label: "Origin & Destination" },
+    { n: 2, label: "The Cargo" },
+    { n: 3, label: "Pick Shipping" },
+    { n: 4, label: "End-to-End Total" },
+  ];
+  const [step, setStep] = useState(1);
+  const canContinue = step === 3 ? !!selected : true;
+  const isLast = step === STEPS.length;
 
   // ============ WARNINGS ============
   const warnings: React.ReactNode[] = [];
@@ -123,18 +140,9 @@ export default function Home() {
       <header>
         <div className="masthead">
           <div className="brand">
-            <img
-              className="brand-logo"
-              src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/hilbertos.jpg`}
-              alt="Hilberto's Mexican Food logo"
-              width={130}
-              height={130}
-            />
-            <div className="brand-text">
-              <div className="eyebrow">Bill of Lading // Form B-1996 // Perishable Goods</div>
-              <h1>Hilbertos<br /><span className="accent">freight</span> co.</h1>
-              <p className="tagline">Calculate the true cost of moving rolled tortillas across this great nation. Updated with January 2026 carrier rates.</p>
-            </div>
+            <div className="eyebrow">Bill of Lading // Form B-1996 // Perishable Goods</div>
+            <h1>burrito shipping wizard</h1>
+            <p className="tagline">Los burritos son muy sabrosos.</p>
           </div>
           <div className="stamp">
             <strong>KEEP REFRIGERATED</strong>
@@ -144,54 +152,113 @@ export default function Home() {
       </header>
 
       <div className="stack">
-        <RoutePanel
-          from={from}
-          to={to}
-          fromZip={fromZip}
-          toZip={toZip}
-          fromLabel={fromLabel}
-          toLabel={toLabel}
-          miles={miles}
-          zone={zone}
-          route={route}
-          onFromResolve={(lat, lng, city, state) => {
-            setFrom({ lat, lng });
-            setFromLabel(`${city}, ${state}`);
-          }}
-          onToResolve={(lat, lng, city, state) => {
-            setTo({ lat, lng });
-            setToLabel(`${city}, ${state}`);
-          }}
-        />
-        <StaticCosts />
-        <BurritoCounter
-          count={burritos}
-          onChange={setBurritos}
-          shippingCost={cheapestGround}
-          materialCost={materialCost}
-          ingredientCost={ingredientCost}
-          totalCost={totalCost}
-        />
-        <QuotesTable quotesByService={quotesByService} warnings={warnings} />
-        <GrandTotal cargoCost={materialCost + ingredientCost} shippingCost={cheapestGround} />
-        <div className="panel">
-          <div className="panel-header">
-            <span>How We Calculate</span>
-          </div>
-          <div className="panel-body">
-            <div className="calc-explainer">
-              <div><strong>Burrito mass:</strong> 2 lb each (constant)</div>
-              <div><strong>Box overhead:</strong> +4 lb (insulated cooler + ice packs)</div>
-              <div><strong>Zone:</strong> derived from straight-line distance, USPS-style banding</div>
-              <div><strong>Rates:</strong> 2026 published carrier rates, est. per-lb above 1lb base</div>
-              <div><strong>★ Best value</strong> per service tier highlighted</div>
+        <div className="wizard-progress">
+          <div className="wizard-progress-mobile">
+            <div className="wizard-progress-label">
+              <span className="wizard-progress-counter">Step {step} of {STEPS.length}</span>
+              <strong className="wizard-progress-title">{STEPS[step - 1].label}</strong>
+            </div>
+            <div className="wizard-progress-track">
+              <div
+                className="wizard-progress-fill"
+                style={{ width: `${(step / STEPS.length) * 100}%` }}
+              />
             </div>
           </div>
+
+          <ol className="wizard-steps">
+            {STEPS.map((s) => (
+              <li
+                key={s.n}
+                className={`wizard-step ${s.n === step ? "current" : ""} ${s.n < step ? "done" : ""}`}
+              >
+                <span className="wizard-step-num">{s.n}</span>
+                <span className="wizard-step-label">{s.label}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+
+        {step === 1 && (
+          <RoutePanel
+            from={from}
+            to={to}
+            fromZip={fromZip}
+            toZip={toZip}
+            fromLabel={fromLabel}
+            toLabel={toLabel}
+            miles={miles}
+            zone={zone}
+            route={route}
+            onFromResolve={(lat, lng, city, state) => {
+              setFrom({ lat, lng });
+              setFromLabel(`${city}, ${state}`);
+            }}
+            onToResolve={(lat, lng, city, state) => {
+              setTo({ lat, lng });
+              setToLabel(`${city}, ${state}`);
+            }}
+          />
+        )}
+
+        {step === 2 && (
+          <>
+            <StaticCosts />
+            <BurritoCounter
+              count={burritos}
+              onChange={setBurritos}
+              materialCost={materialCost}
+              ingredientCost={ingredientCost}
+            />
+          </>
+        )}
+
+        {step === 3 && (
+          <QuotesTable
+            quotesByService={quotesByService}
+            warnings={warnings}
+            selected={selected}
+            onSelect={(service, carrier) => setSelected({ service, carrier })}
+          />
+        )}
+
+        {step === 4 && (
+          <GrandTotal cargoCost={cargoCost} selectedQuote={selectedQuote} />
+        )}
+
+        <div className="wizard-nav">
+          <button
+            type="button"
+            className="wizard-btn wizard-back"
+            onClick={() => setStep((s) => Math.max(1, s - 1))}
+            disabled={step === 1}
+          >
+            ← Back
+          </button>
+          {isLast ? (
+            <button
+              type="button"
+              className="wizard-btn wizard-restart"
+              onClick={() => { setStep(1); setSelected(null); }}
+            >
+              Start over
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="wizard-btn wizard-continue"
+              onClick={() => setStep((s) => Math.min(STEPS.length, s + 1))}
+              disabled={!canContinue}
+              title={!canContinue ? "Pick a shipping option to continue" : undefined}
+            >
+              Continue →
+            </button>
+          )}
         </div>
       </div>
 
       <div className="footer-note">
-        Estimates only · Real rates depend on dimensional weight, surcharges, fuel adjustments, and your account tier · Hilbertos Freight Co. is fictional · Don&apos;t actually ship perishables without proper food-safety packaging
+        Estimates only · Real rates depend on dimensional weight, surcharges, fuel adjustments, and your account tier · Burrito Shipping Wizard is fictional · Don&apos;t actually ship perishables without proper food-safety packaging
       </div>
     </div>
   );

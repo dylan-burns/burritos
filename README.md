@@ -1,4 +1,4 @@
-# Hilbertos Freight Co. — Burrito Shipping Calculator
+# Hilbertos Burrito Calculator
 
 A satirical bill-of-lading-themed shipping calculator that estimates the true cost of moving steak-and-cheese burritos across the United States via FedEx, UPS, and USPS, with cold-chain risk warnings, ZIP-to-ZIP routing, and an itemized total.
 
@@ -62,4 +62,4 @@ src/
 
 ## Disclaimer
 
-Carrier rates are 2026-published estimates and exclude dimensional weight, surcharges, and account-tier discounts. Hilbertos Freight Co. is fictional. Do not actually ship perishables without proper food-safety packaging.
+Carrier rates are 2026-published estimates and exclude dimensional weight, surcharges, and account-tier discounts. Hilbertos Burrito Calculator is fictional. Do not actually ship perishables without proper food-safety packaging.

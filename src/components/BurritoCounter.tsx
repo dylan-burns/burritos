@@ -5,17 +5,16 @@ import { BURRITO_LB, BOX_OVERHEAD_LB } from "@/lib/shipping";
 interface BurritoCounterProps {
   count: number;
   onChange: (n: number) => void;
-  shippingCost: number;
   materialCost: number;
   ingredientCost: number;
-  totalCost: number;
 }
 
 export default function BurritoCounter({
-  count, onChange, shippingCost, materialCost, ingredientCost, totalCost,
+  count, onChange, materialCost, ingredientCost,
 }: BurritoCounterProps) {
   const cargoWt = count * BURRITO_LB;
   const totalWt = cargoWt + BOX_OVERHEAD_LB;
+  const cargoSubtotal = materialCost + ingredientCost;
   const set = (n: number) => onChange(Math.max(1, Math.min(200, Math.floor(n) || 1)));
 
   return (
@@ -50,10 +49,6 @@ export default function BurritoCounter({
             </td>
           </tr>
           <tr>
-            <th>Cheapest shipping</th>
-            <td>${shippingCost.toFixed(2)}</td>
-          </tr>
-          <tr>
             <th>Materials</th>
             <td>${materialCost.toFixed(2)}</td>
           </tr>
@@ -62,8 +57,8 @@ export default function BurritoCounter({
             <td>${ingredientCost.toFixed(2)}</td>
           </tr>
           <tr className="cargo-total">
-            <th>Total shipment cost</th>
-            <td>${totalCost.toFixed(2)}</td>
+            <th>Cargo subtotal</th>
+            <td>${cargoSubtotal.toFixed(2)}</td>
           </tr>
         </tbody>
       </table>
