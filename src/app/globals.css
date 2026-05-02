@@ -68,7 +68,22 @@ header {
   gap: 16px;
 }
 
-.brand { width: 100%; }
+.brand {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.brand-text { width: 100%; }
+
+.brand-logo {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: block;
+}
 
 .eyebrow {
   font-family: 'DM Mono', monospace;
@@ -641,58 +656,89 @@ input[type=range]::-moz-range-thumb {
   text-transform: uppercase;
 }
 
-/* ============ STATIC COSTS PANEL ============ */
-.static-costs-panel {
+/* ============ GRAND TOTAL PANEL ============ */
+.grand-total-panel {
   border-color: var(--terracotta);
   box-shadow: 4px 4px 0 var(--terracotta);
 }
 
-.static-costs-panel .panel-header {
+.grand-total-panel .panel-header {
   background: var(--terracotta);
-  color: var(--cream);
   border-bottom-color: var(--terracotta-deep);
 }
 
-.static-costs-panel .panel-header .num {
+.grand-total-panel .panel-header .num {
   background: var(--cream);
   color: var(--terracotta);
   width: 28px;
   height: 28px;
-  font-size: 18px;
+  font-size: 16px;
+  font-family: 'Bowlby One', serif;
   line-height: 1;
 }
 
-.static-costs-list {
-  display: grid;
-  grid-template-columns: 1fr;
+.grand-total-body {
+  padding: 18px 20px;
   background: var(--cream-deep);
 }
 
-.static-cost-row {
+.grand-total-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  padding: 12px 16px;
-  border-bottom: 1px solid var(--line);
-  gap: 12px;
+  padding: 8px 0;
+  font-family: 'DM Mono', monospace;
 }
 
-.static-cost-row:last-child { border-bottom: none; }
-
-.static-cost-label {
-  font-family: 'DM Mono', monospace;
+.grand-total-row .gt-label {
   font-size: 11px;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--char-soft);
 }
 
-.static-cost-value {
+.grand-total-row .gt-value {
   font-family: 'Fraunces', serif;
   font-size: 20px;
   font-weight: 700;
   color: var(--char);
-  white-space: nowrap;
+}
+
+.grand-total-row.grand-total-final {
+  border-top: 2px solid var(--char);
+  margin-top: 8px;
+  padding-top: 14px;
+}
+
+.grand-total-row.grand-total-final .gt-label {
+  font-family: 'Bowlby One', serif;
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  color: var(--char);
+}
+
+.grand-total-row.grand-total-final .gt-value {
+  font-family: 'Bowlby One', serif;
+  font-size: 36px;
+  color: var(--terracotta);
+  letter-spacing: -0.02em;
+}
+
+/* ============ STATIC COSTS LINE ============ */
+.static-costs-line {
+  font-family: 'Fraunces', serif;
+  font-style: italic;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--terracotta-deep);
+  text-align: center;
+  padding: 4px 8px;
+}
+
+.static-costs-line em {
+  font-weight: 700;
+  font-style: italic;
+  color: var(--terracotta);
 }
 
 /* ============ WARNINGS ============ */
@@ -790,7 +836,14 @@ input[type=range]::-moz-range-thumb {
     flex-wrap: wrap;
   }
 
-  .brand { flex: 1; min-width: 280px; }
+  .brand {
+    flex: 1;
+    min-width: 280px;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 22px;
+  }
+  .brand-logo { width: 130px; height: 130px; flex-shrink: 0; }
 
   .stamp {
     font-size: 10px;
@@ -802,29 +855,10 @@ input[type=range]::-moz-range-thumb {
 
 
   .panel { box-shadow: 6px 6px 0 var(--char); }
-  .static-costs-panel {
-    box-shadow: 6px 6px 0 var(--terracotta);
-  }
-  .static-costs-panel .panel-header .num {
-    width: 34px;
-    height: 34px;
-    font-size: 22px;
-  }
+  .static-costs-line { font-size: 16px; }
+  .grand-total-panel { box-shadow: 6px 6px 0 var(--terracotta); }
+  .grand-total-row.grand-total-final .gt-value { font-size: 48px; }
   .stack { gap: 24px; }
-  .static-costs-list {
-    grid-template-columns: repeat(3, 1fr);
-  }
-  .static-cost-row {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    border-bottom: none;
-    border-right: 1px solid var(--line);
-    padding: 16px 12px;
-    gap: 6px;
-  }
-  .static-cost-row:last-child { border-right: none; }
-  .static-cost-value { font-size: 22px; }
   .panel-header { padding: 14px 20px; font-size: 11px; letter-spacing: 0.18em; }
   .panel-header .num { width: 24px; height: 24px; font-size: 12px; }
   .panel-body { padding: 20px; }

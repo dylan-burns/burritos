@@ -4,6 +4,7 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Hilbertos Freight Co. — Shipping Calculator",
   description: "Calculate the true cost of moving rolled tortillas across this great nation.",
+  icons: { icon: "/hilbertos.jpg" },
 };
 
 export const viewport: Viewport = {

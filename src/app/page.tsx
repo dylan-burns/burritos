@@ -5,6 +5,7 @@ import RoutePanel, { Coords } from "@/components/RoutePanel";
 import BurritoCounter from "@/components/BurritoCounter";
 import QuotesTable from "@/components/QuotesTable";
 import StaticCosts from "@/components/StaticCosts";
+import GrandTotal from "@/components/GrandTotal";
 import { getDrivingRoute, DrivingRoute } from "@/lib/routing";
 import {
   haversineMiles,
@@ -122,9 +123,18 @@ export default function Home() {
       <header>
         <div className="masthead">
           <div className="brand">
-            <div className="eyebrow">Bill of Lading // Form B-1996 // Perishable Goods</div>
-            <h1>Hilbertos<br /><span className="accent">freight</span> co.</h1>
-            <p className="tagline">Calculate the true cost of moving rolled tortillas across this great nation. Updated with January 2026 carrier rates.</p>
+            <img
+              className="brand-logo"
+              src={`${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/hilbertos.jpg`}
+              alt="Hilberto's Mexican Food logo"
+              width={130}
+              height={130}
+            />
+            <div className="brand-text">
+              <div className="eyebrow">Bill of Lading // Form B-1996 // Perishable Goods</div>
+              <h1>Hilbertos<br /><span className="accent">freight</span> co.</h1>
+              <p className="tagline">Calculate the true cost of moving rolled tortillas across this great nation. Updated with January 2026 carrier rates.</p>
+            </div>
           </div>
           <div className="stamp">
             <strong>KEEP REFRIGERATED</strong>
@@ -163,6 +173,7 @@ export default function Home() {
           totalCost={totalCost}
         />
         <QuotesTable quotesByService={quotesByService} warnings={warnings} />
+        <GrandTotal cargoCost={materialCost + ingredientCost} shippingCost={cheapestGround} />
         <div className="panel">
           <div className="panel-header">
             <span>How We Calculate</span>
